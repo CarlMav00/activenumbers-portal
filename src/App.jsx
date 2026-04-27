@@ -12,17 +12,7 @@ import JobResultsPage from './pages/JobResultsPage'
 import PlansPage from './pages/PlansPage'
 import AddCardPage from './pages/AddCardPage'
 import BillingPage from './pages/BillingPage'
-
-function PlaceholderPage({ title }) {
-  return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <div className="card p-8 text-center">
-        <h1 className="font-serif text-xl text-navy font-semibold mb-2">{title}</h1>
-        <p className="text-sm text-slate-400">Coming in Portal Phase 4</p>
-      </div>
-    </div>
-  )
-}
+import AccountPage from './pages/AccountPage'
 
 export default function App() {
   return (
@@ -40,7 +30,7 @@ export default function App() {
           <Route path="/plans" element={<ProtectedRoute><PlansPage /></ProtectedRoute>} />
           <Route path="/billing" element={<ProtectedRoute><BillingPage /></ProtectedRoute>} />
           <Route path="/billing/card" element={<ProtectedRoute><AddCardPage /></ProtectedRoute>} />
-          <Route path="/account" element={<ProtectedRoute><PlaceholderPage title="Account Settings — Phase 4" /></ProtectedRoute>} />
+          <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

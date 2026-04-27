@@ -8,9 +8,17 @@
 }
 
 @layer components {
-  .btn-primary { @apply inline-flex items-center justify-center gap-2 bg-blue-brand text-white font-medium text-sm px-6 py-3 rounded-lg transition-all duration-200 hover:bg-blue-mid disabled:opacity-50 disabled:cursor-not-allowed; }
-  .btn-secondary { @apply inline-flex items-center justify-center gap-2 bg-white text-navy border border-gray-200 font-medium text-sm px-6 py-3 rounded-lg transition-all duration-200 hover:border-navy disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 bg-blue-brand text-white font-medium text-sm px-6 py-3 rounded-lg transition-all duration-200 hover:bg-blue-mid disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]; }
+  .btn-secondary { @apply inline-flex items-center justify-center gap-2 bg-white text-navy border border-gray-200 font-medium text-sm px-6 py-3 rounded-lg transition-all duration-200 hover:border-navy disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]; }
   .input-field { @apply w-full px-4 py-3 rounded-lg border border-gray-200 text-navy text-sm bg-white placeholder-slate-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-brand focus:border-transparent; }
   .card { @apply bg-white rounded-2xl border border-gray-100 shadow-sm; }
   .label { @apply block text-sm font-medium text-navy mb-1.5; }
+
+  /* Grade badges */
+  .grade-a { @apply bg-emerald-50 text-emerald-700 border-emerald-200; }
+  .grade-b { @apply bg-green-50 text-green-700 border-green-200; }
+  .grade-c { @apply bg-yellow-50 text-yellow-700 border-yellow-200; }
+  .grade-d { @apply bg-orange-50 text-orange-700 border-orange-200; }
+  .grade-e { @apply bg-red-50 text-red-600 border-red-200; }
+  .grade-f { @apply bg-gray-50 text-gray-500 border-gray-200; }
 }
