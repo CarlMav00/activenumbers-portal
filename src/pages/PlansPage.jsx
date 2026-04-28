@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PortalLayout from '../components/layout/PortalLayout'
 import { useAuth } from '../context/AuthContext'
@@ -46,12 +46,121 @@ function CheckIcon() {
   )
 }
 
+const MAX_MSG = 500
+
+function ContactModal({ user, onClose }) {
+  const [form, setForm] = useState({
+    from: user?.email || '',
+    subject: 'Enterprise inquiry',
+    message: '',
+  })
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [err, setErr] = useState('')
+  const overlayRef = useRef(null)
+
+  const remaining = MAX_MSG - form.message.length
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!form.message.trim()) return
+    setSending(true)
+    setErr('')
+    try {
+      await api.post('/contact', {
+        from: form.from,
+        subject: form.subject,
+        message: form.message,
+      })
+      setSent(true)
+    } catch {
+      setErr('Something went wrong. Please email us directly at hello@activenumbers.io.')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div
+      ref={overlayRef}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      onClick={e => { if (e.target === overlayRef.current) onClose() }}
+    >
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h2 className="font-serif text-lg font-semibold text-navy">Contact us</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-navy transition-colors">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        {sent ? (
+          <div className="px-6 py-10 text-center">
+            <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <p className="font-medium text-navy mb-1">Message sent</p>
+            <p className="text-sm text-slate-500 mb-5">We'll get back to you at {form.from}.</p>
+            <button onClick={onClose} className="btn-primary text-sm">Done</button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+            <div>
+              <label className="label">Your email</label>
+              <input
+                type="email"
+                className="input-field"
+                value={form.from}
+                onChange={e => setForm(p => ({ ...p, from: e.target.value }))}
+                required
+              />
+            </div>
+            <div>
+              <label className="label">Subject</label>
+              <input
+                type="text"
+                className="input-field"
+                value={form.subject}
+                onChange={e => setForm(p => ({ ...p, subject: e.target.value }))}
+                required
+              />
+            </div>
+            <div>
+              <label className="label">Message</label>
+              <textarea
+                className="input-field resize-none"
+                rows={5}
+                maxLength={MAX_MSG}
+                placeholder="Tell us about your use case, expected volume, or any questions…"
+                value={form.message}
+                onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
+                required
+              />
+              <p className={`text-xs mt-1 text-right ${remaining <= 50 ? 'text-amber-500' : 'text-slate-400'}`}>
+                {remaining} characters remaining
+              </p>
+            </div>
+            {err && <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-600">{err}</div>}
+            <div className="flex gap-3 pt-1">
+              <button type="button" onClick={onClose} className="btn-secondary flex-1 text-sm">Cancel</button>
+              <button type="submit" className="btn-primary flex-1 text-sm" disabled={sending || !form.message.trim()}>
+                {sending ? 'Sending…' : 'Send message'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function PlansPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(null)
   const [error, setError] = useState('')
   const [currentPlan, setCurrentPlan] = useState(user?.plan || 'free')
+  const [contactOpen, setContactOpen] = useState(false)
 
   useEffect(() => {
     api.get('/billing/subscription').then(res => {
@@ -181,9 +290,9 @@ export default function PlansPage() {
             <p className="font-medium text-navy">Enterprise</p>
             <p className="text-sm text-slate-500 mt-0.5">17,000+ numbers/mo · custom pricing · dedicated support</p>
           </div>
-          <a href="mailto:hello@activenumbers.io?subject=Enterprise inquiry" className="btn-secondary flex-shrink-0 text-sm">
+          <button onClick={() => setContactOpen(true)} className="btn-secondary flex-shrink-0 text-sm">
             Contact us
-          </a>
+          </button>
         </div>
 
         {/* Cancel subscription */}
@@ -195,6 +304,7 @@ export default function PlansPage() {
           </div>
         )}
       </div>
+      {contactOpen && <ContactModal user={user} onClose={() => setContactOpen(false)} />}
     </PortalLayout>
   )
 }
