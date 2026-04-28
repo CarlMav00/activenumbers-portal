@@ -67,11 +67,12 @@ function ContactModal({ user, onClose }) {
     setSending(true)
     setErr('')
     try {
-      await api.post('/contact', {
-        from: form.from,
-        subject: form.subject,
-        message: form.message,
+      const res = await fetch('https://formspree.io/f/mgorgyoa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ email: form.from, subject: form.subject, message: form.message }),
       })
+      if (!res.ok) throw new Error()
       setSent(true)
     } catch {
       setErr('Something went wrong. Please email us directly at hello@activenumbers.io.')
