@@ -78,7 +78,7 @@ export default function JobResultsPage() {
     setDownloading(true)
     try {
       const { data } = await api.get(`/jobs/${jobId}/download`)
-      const url = data.data?.url || data.url
+      const url = data.data?.downloadUrl || data.downloadUrl || data.data?.url || data.url
       window.open(url, '_blank')
     } catch {
       setError('Download failed. Please try again.')
