@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import logoSrc from '../../assets/logo.js'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
@@ -34,13 +35,7 @@ export default function PortalLayout({ children }) {
     <div className="flex flex-col h-full">
       <div className="px-4 py-5 border-b border-gray-100">
         <Link to="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-navy rounded-lg flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-              <path d="M10 2L3 6v8l7 4 7-4V6L10 2z" stroke="#93C5FD" strokeWidth="1.5" strokeLinejoin="round"/>
-              <path d="M10 2v12M3 6l7 4 7-4" stroke="#93C5FD" strokeWidth="1.5" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <span className="font-serif text-base font-semibold text-navy">Active Numbers</span>
+          <img src={logoSrc} alt="Active Numbers" className="h-8 w-auto" />
         </Link>
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
