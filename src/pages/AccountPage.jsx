@@ -58,7 +58,8 @@ export default function AccountPage() {
   useEffect(() => {
     // Load API keys
     api.get('/verify/keys').then(res => {
-      setApiKeys(res.data.data || res.data || [])
+      const keys = res.data.data || res.data || []
+      setApiKeys(Array.isArray(keys) ? keys : [])
     }).catch(() => {}).finally(() => setKeysLoading(false))
 
     // Load webhook
