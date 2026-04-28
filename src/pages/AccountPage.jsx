@@ -62,7 +62,7 @@ export default function AccountPage() {
     }).catch(() => {}).finally(() => setKeysLoading(false))
 
     // Load webhook
-    api.get('/portal/account').then(res => {
+    api.get('/verify/webhooks').then(res => {
       const url = res.data.data?.webhookUrl || res.data.webhookUrl || ''
       setWebhookUrl(url)
     }).catch(() => {})
@@ -119,7 +119,7 @@ export default function AccountPage() {
     setWebhookError('')
     setWebhookLoading(true)
     try {
-      await api.post('/portal/webhook', { url: webhookUrl })
+      await api.post('/verify/webhooks', { url: webhookUrl })
       setWebhookSuccess(true)
       setTimeout(() => setWebhookSuccess(false), 3000)
     } catch (err) {
