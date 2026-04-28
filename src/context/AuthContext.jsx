@@ -1,10 +1,16 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import api from '../lib/api'
 const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem('an_user')) } catch { return null }
   })
+
+  useEffect(() => {
+    const handleUnauthorized = () => setUser(null)
+    window.addEventListener('auth:unauthorized', handleUnauthorized)
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized)
+  }, [])
   const login = useCallback(async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password })
     const token = data.accessToken || data.data?.accessToken
