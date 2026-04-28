@@ -5,7 +5,7 @@ export default function AuthLayout({ children, title, subtitle }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col items-center justify-center px-4 py-12">
       <Link to="https://activenumbers.io" className="flex items-center gap-2.5 mb-8">
-        <img src={logoSrc} alt="Active Numbers" className="h-10 w-auto" />
+        <img src={logoSrc} alt="Active Numbers" className="h-20 w-auto" />
       </Link>
       <div className="card w-full max-w-md p-8">
         {title && (

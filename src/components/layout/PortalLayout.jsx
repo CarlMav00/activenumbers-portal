@@ -25,7 +25,7 @@ function Sidebar({ user, pathname, onLogout }) {
     <div className="flex flex-col h-full">
       <div className="px-4 py-5 border-b border-gray-100">
         <Link to="/dashboard" className="flex items-center gap-2.5">
-          <img src={logoSrc} alt="Active Numbers" className="h-8 w-auto" />
+          <img src={logoSrc} alt="Active Numbers" className="h-12 w-auto" />
         </Link>
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
