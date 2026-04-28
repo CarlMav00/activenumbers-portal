@@ -49,24 +49,24 @@ export default function AccountPage() {
   const [newKeyValue, setNewKeyValue] = useState(null)
   const [keyError, setKeyError] = useState('')
 
-  // Webhook
-  const [webhookUrl, setWebhookUrl] = useState('')
-  const [webhookLoading, setWebhookLoading] = useState(false)
-  const [webhookSuccess, setWebhookSuccess] = useState(false)
+  // Webhooks
+  const [webhooks, setWebhooks] = useState([])
+  const [webhooksLoading, setWebhooksLoading] = useState(true)
+  const [newWebhookUrl, setNewWebhookUrl] = useState('')
+  const [addingWebhook, setAddingWebhook] = useState(false)
+  const [newWebhookSecret, setNewWebhookSecret] = useState(null)
   const [webhookError, setWebhookError] = useState('')
 
   useEffect(() => {
-    // Load API keys
     api.get('/verify/keys').then(res => {
-      const keys = res.data.data || res.data || []
+      const keys = res.data.keys || []
       setApiKeys(Array.isArray(keys) ? keys : [])
     }).catch(() => {}).finally(() => setKeysLoading(false))
 
-    // Load webhook
     api.get('/verify/webhooks').then(res => {
-      const url = res.data.data?.webhookUrl || res.data.webhookUrl || ''
-      setWebhookUrl(url)
-    }).catch(() => {})
+      const wh = res.data.webhooks || []
+      setWebhooks(Array.isArray(wh) ? wh : [])
+    }).catch(() => {}).finally(() => setWebhooksLoading(false))
   }, [])
 
   const handlePasswordChange = async (e) => {
@@ -94,9 +94,8 @@ export default function AccountPage() {
     setCreatingKey(true)
     try {
       const { data } = await api.post('/verify/keys', { name: newKeyName.trim() })
-      const key = data.data || data
-      setNewKeyValue(key.key || key.apiKey)
-      setApiKeys(prev => [...prev, key])
+      setNewKeyValue(data.key)
+      setApiKeys(prev => [...prev, { id: data.id, name: data.name, key_prefix: data.keyPrefix }])
       setNewKeyName('')
     } catch (err) {
       setKeyError(err.response?.data?.message || 'Failed to create API key.')
@@ -115,18 +114,31 @@ export default function AccountPage() {
     }
   }
 
-  const handleWebhookSave = async (e) => {
+  const handleAddWebhook = async (e) => {
     e.preventDefault()
+    if (!newWebhookUrl.trim()) return
     setWebhookError('')
-    setWebhookLoading(true)
+    setAddingWebhook(true)
     try {
-      await api.post('/verify/webhooks', { url: webhookUrl })
-      setWebhookSuccess(true)
-      setTimeout(() => setWebhookSuccess(false), 3000)
+      const { data } = await api.post('/verify/webhooks', { url: newWebhookUrl.trim() })
+      setNewWebhookSecret(data.webhook.secret)
+      setWebhooks(prev => [...prev, data.webhook])
+      setNewWebhookUrl('')
     } catch (err) {
-      setWebhookError(err.response?.data?.message || 'Failed to save webhook URL.')
+      setWebhookError(err.response?.data?.message || 'Failed to add webhook.')
     } finally {
-      setWebhookLoading(false)
+      setAddingWebhook(false)
+    }
+  }
+
+  const handleDeleteWebhook = async (webhookId) => {
+    if (!confirm('Delete this webhook? Deliveries will stop immediately.')) return
+    try {
+      await api.delete(`/verify/webhooks/${webhookId}`)
+      setWebhooks(prev => prev.filter(w => w.id !== webhookId))
+      if (newWebhookSecret) setNewWebhookSecret(null)
+    } catch (err) {
+      setWebhookError(err.response?.data?.message || 'Failed to delete webhook.')
     }
   }
 
@@ -186,7 +198,7 @@ export default function AccountPage() {
         <Section title="API Keys">
           {newKeyValue && (
             <div className="mb-5 bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <p className="text-xs font-medium text-amber-800 mb-2">⚠️ Copy this key now — it won't be shown again</p>
+              <p className="text-xs font-medium text-amber-800 mb-2">Copy this key now — it won't be shown again</p>
               <div className="flex items-center gap-2 bg-white rounded border border-amber-200 px-3 py-2">
                 <code className="text-xs font-mono text-navy flex-1 truncate">{newKeyValue}</code>
                 <CopyButton text={newKeyValue} />
@@ -205,7 +217,7 @@ export default function AccountPage() {
                 <div key={key.id} className="flex items-center justify-between gap-3 px-4 py-3 bg-slate-50 rounded-lg border border-gray-100">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-navy">{key.name}</p>
-                    <p className="text-xs font-mono text-slate-400 truncate">{key.keyPrefix || key.key_prefix || 'an_'}••••••••••••</p>
+                    <p className="text-xs font-mono text-slate-400 truncate">{key.key_prefix || key.keyPrefix}••••••••••••</p>
                   </div>
                   <button onClick={() => handleRevokeKey(key.id)} className="text-xs text-red-400 hover:text-red-600 hover:underline flex-shrink-0">
                     Revoke
@@ -224,7 +236,7 @@ export default function AccountPage() {
               placeholder="Key name e.g. Production"
               value={newKeyName}
               onChange={e => setNewKeyName(e.target.value)}
-              maxLength={50}
+              maxLength={100}
             />
             <button type="submit" className="btn-secondary flex-shrink-0" disabled={creatingKey || !newKeyName.trim()}>
               {creatingKey ? <Spinner /> : 'Create key'}
@@ -232,31 +244,60 @@ export default function AccountPage() {
           </form>
         </Section>
 
-        {/* Webhook */}
-        <Section title="Webhook">
+        {/* Webhooks */}
+        <Section title="Webhooks">
           <p className="text-sm text-slate-500 mb-4">
-            Receive a POST request to your URL when a job completes. Includes the full results payload.
+            Receive a signed POST request to your URL when a job completes. Each webhook has a unique HMAC secret for verifying authenticity.
           </p>
-          <form onSubmit={handleWebhookSave} className="space-y-4">
-            <div>
-              <label className="label">Webhook URL</label>
-              <input
-                type="url"
-                className="input-field"
-                placeholder="https://yourapp.com/webhooks/activenumbers"
-                value={webhookUrl}
-                onChange={e => setWebhookUrl(e.target.value)}
-              />
+
+          {newWebhookSecret && (
+            <div className="mb-5 bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <p className="text-xs font-medium text-amber-800 mb-2">Copy your signing secret now — it won't be shown again</p>
+              <div className="flex items-center gap-2 bg-white rounded border border-amber-200 px-3 py-2">
+                <code className="text-xs font-mono text-navy flex-1 truncate">{newWebhookSecret}</code>
+                <CopyButton text={newWebhookSecret} />
+              </div>
+              <button onClick={() => setNewWebhookSecret(null)} className="text-xs text-amber-600 hover:underline mt-2">Dismiss</button>
             </div>
-            {webhookError && <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-600">{webhookError}</div>}
-            {webhookSuccess && <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 text-sm text-emerald-700">Webhook URL saved.</div>}
-            <button type="submit" className="btn-primary" disabled={webhookLoading}>
-              {webhookLoading ? <><Spinner /> Saving...</> : 'Save webhook URL'}
+          )}
+
+          {webhooksLoading ? (
+            <p className="text-sm text-slate-400">Loading webhooks...</p>
+          ) : webhooks.length === 0 ? (
+            <p className="text-sm text-slate-400 mb-4">No webhooks registered yet.</p>
+          ) : (
+            <div className="space-y-2 mb-5">
+              {webhooks.map(wh => (
+                <div key={wh.id} className="flex items-center justify-between gap-3 px-4 py-3 bg-slate-50 rounded-lg border border-gray-100">
+                  <div className="min-w-0">
+                    <p className="text-xs font-mono text-slate-600 truncate">{wh.url}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Events: {Array.isArray(wh.events) ? wh.events.join(', ') : wh.events}</p>
+                  </div>
+                  <button onClick={() => handleDeleteWebhook(wh.id)} className="text-xs text-red-400 hover:text-red-600 hover:underline flex-shrink-0">
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {webhookError && <div className="mb-4 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-600">{webhookError}</div>}
+
+          <form onSubmit={handleAddWebhook} className="flex gap-2">
+            <input
+              type="url"
+              className="input-field flex-1"
+              placeholder="https://yourapp.com/webhooks/activenumbers"
+              value={newWebhookUrl}
+              onChange={e => setNewWebhookUrl(e.target.value)}
+            />
+            <button type="submit" className="btn-secondary flex-shrink-0" disabled={addingWebhook || !newWebhookUrl.trim()}>
+              {addingWebhook ? <Spinner /> : 'Add webhook'}
             </button>
           </form>
         </Section>
 
-        {/* Danger zone */}
+        {/* Data & Privacy */}
         <Section title="Data & Privacy">
           <p className="text-sm text-slate-500 mb-4">
             Under PIPEDA you have the right to request deletion of your personal data.
