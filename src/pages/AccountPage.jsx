@@ -57,7 +57,7 @@ export default function AccountPage() {
 
   useEffect(() => {
     // Load API keys
-    api.get('/api-keys').then(res => {
+    api.get('/verify/keys').then(res => {
       setApiKeys(res.data.data || res.data || [])
     }).catch(() => {}).finally(() => setKeysLoading(false))
 
@@ -92,7 +92,7 @@ export default function AccountPage() {
     setKeyError('')
     setCreatingKey(true)
     try {
-      const { data } = await api.post('/api-keys', { name: newKeyName.trim() })
+      const { data } = await api.post('/verify/keys', { name: newKeyName.trim() })
       const key = data.data || data
       setNewKeyValue(key.key || key.apiKey)
       setApiKeys(prev => [...prev, key])
@@ -107,7 +107,7 @@ export default function AccountPage() {
   const handleRevokeKey = async (keyId) => {
     if (!confirm('Revoke this API key? Any integrations using it will stop working immediately.')) return
     try {
-      await api.delete(`/api-keys/${keyId}`)
+      await api.delete(`/verify/keys/${keyId}`)
       setApiKeys(prev => prev.filter(k => k.id !== keyId))
     } catch (err) {
       setKeyError(err.response?.data?.message || 'Failed to revoke key.')

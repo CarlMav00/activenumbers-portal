@@ -65,7 +65,7 @@ export default function PlansPage() {
     setLoading(plan.id)
     try {
       // Check if they have a card on file first
-      const cardRes = await api.get('/billing/card')
+      const cardRes = await api.get('/billing/payment-methods')
       const hasCard = cardRes.data.data?.hasCard || cardRes.data.hasCard || false
       if (!hasCard) {
         // Send to add card page with plan intent

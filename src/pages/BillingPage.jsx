@@ -18,7 +18,7 @@ export default function BillingPage() {
     Promise.all([
       api.get('/billing/credits'),
       api.get('/billing/transactions').catch(() => ({ data: { data: [] } })),
-      api.get('/billing/subscription').catch(() => ({ data: {} })),
+      api.get('/billing/payment-methods').catch(() => ({ data: {} })),
     ]).then(([creditsRes, txRes, subRes]) => {
       const credits = creditsRes.data.data?.balance ?? creditsRes.data.data?.credits ?? creditsRes.data.balance ?? creditsRes.data.credits ?? 0
       const sub = subRes.data.data || subRes.data
