@@ -20,6 +20,7 @@ export default function UploadPage() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [insufficientFunds, setInsufficientFunds] = useState(false)
+  const [overageInfo, setOverageInfo] = useState(null)
 
   const handleFile = (f) => {
     if (!f) return
@@ -40,14 +41,16 @@ export default function UploadPage() {
     handleFile(e.dataTransfer.files[0])
   }
 
-  const handleUpload = async () => {
+  const handleUpload = async (confirmOverage = false) => {
     if (!file) return
     setUploading(true)
     setError('')
     setInsufficientFunds(false)
+    if (!confirmOverage) setOverageInfo(null)
     try {
       const formData = new FormData()
       formData.append('file', file)
+      if (confirmOverage) formData.append('confirmOverage', 'true')
       const { data } = await api.post('/jobs/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
@@ -55,7 +58,12 @@ export default function UploadPage() {
       navigate(`/jobs/${jobId}`)
     } catch (err) {
       if (err.response?.status === 402) {
-        setInsufficientFunds(true)
+        const body = err.response.data
+        if (body?.code === 'OVERAGE_CONFIRMATION_REQUIRED') {
+          setOverageInfo(body.breakdown)
+        } else {
+          setInsufficientFunds(true)
+        }
       } else {
         setError(err.response?.data?.error?.message || err.response?.data?.message || 'Upload failed. Please try again.')
       }
@@ -120,6 +128,26 @@ export default function UploadPage() {
             <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-start gap-2.5">
               <svg className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/></svg>
               <p className="text-xs text-blue-700">{getTimeNotice(rowCount)}</p>
+            </div>
+          )}
+
+          {overageInfo && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-4 space-y-3">
+              <div className="flex items-start gap-2">
+                <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/></svg>
+                <p className="text-sm font-medium text-amber-800">Monthly limit exceeded — confirm overage charge</p>
+              </div>
+              <div className="text-xs text-amber-700 space-y-1">
+                <div className="flex justify-between"><span>{overageInfo.includedCount.toLocaleString()} numbers at plan rate</span><span>${(overageInfo.includedCents / 100).toFixed(2)}</span></div>
+                <div className="flex justify-between"><span>{overageInfo.overageCount.toLocaleString()} numbers at overage rate (${(overageInfo.overageRateCents / 100).toFixed(3)}/ea)</span><span>${(overageInfo.overageCents / 100).toFixed(2)}</span></div>
+                <div className="flex justify-between font-medium text-amber-800 border-t border-amber-200 pt-1 mt-1"><span>Total charge</span><span>${(overageInfo.totalCents / 100).toFixed(2)}</span></div>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => setOverageInfo(null)} className="btn-secondary text-xs flex-1">Cancel</button>
+                <button onClick={() => handleUpload(true)} disabled={uploading} className="btn-primary text-xs flex-1">
+                  {uploading ? <><Spinner /> Processing...</> : 'Confirm & pay'}
+                </button>
+              </div>
             </div>
           )}
 
