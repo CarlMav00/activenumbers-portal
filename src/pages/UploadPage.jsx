@@ -52,7 +52,7 @@ export default function UploadPage() {
       const jobId = data.data?.jobId || data.data?.job?.id || data.jobId || data.job?.id
       navigate(`/jobs/${jobId}`)
     } catch (err) {
-      setError(err.response?.data?.message || 'Upload failed. Please try again.')
+      setError(err.response?.data?.error?.message || err.response?.data?.message || 'Upload failed. Please try again.')
     } finally {
       setUploading(false)
     }
