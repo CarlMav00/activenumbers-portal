@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import PortalLayout from '../components/layout/PortalLayout'
 import api from '../lib/api'
 
@@ -19,6 +19,7 @@ export default function UploadPage() {
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
+  const [insufficientFunds, setInsufficientFunds] = useState(false)
 
   const handleFile = (f) => {
     if (!f) return
@@ -43,6 +44,7 @@ export default function UploadPage() {
     if (!file) return
     setUploading(true)
     setError('')
+    setInsufficientFunds(false)
     try {
       const formData = new FormData()
       formData.append('file', file)
@@ -52,7 +54,11 @@ export default function UploadPage() {
       const jobId = data.data?.jobId || data.data?.job?.id || data.jobId || data.job?.id
       navigate(`/jobs/${jobId}`)
     } catch (err) {
-      setError(err.response?.data?.error?.message || err.response?.data?.message || 'Upload failed. Please try again.')
+      if (err.response?.status === 402) {
+        setInsufficientFunds(true)
+      } else {
+        setError(err.response?.data?.error?.message || err.response?.data?.message || 'Upload failed. Please try again.')
+      }
     } finally {
       setUploading(false)
     }
@@ -114,6 +120,14 @@ export default function UploadPage() {
             <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-start gap-2.5">
               <svg className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/></svg>
               <p className="text-xs text-blue-700">{getTimeNotice(rowCount)}</p>
+            </div>
+          )}
+
+          {insufficientFunds && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+              <p className="text-sm font-medium text-amber-800">Insufficient credit balance</p>
+              <p className="text-xs text-amber-700 mt-0.5">You don't have enough credit to verify this list.</p>
+              <Link to="/billing" className="inline-block mt-2 text-xs font-medium text-amber-800 underline underline-offset-2">Add credits on the billing page →</Link>
             </div>
           )}
 
