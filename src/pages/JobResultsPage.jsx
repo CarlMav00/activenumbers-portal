@@ -36,6 +36,13 @@ function StatusBadge({ status }) {
   )
 }
 
+function getTimeEstimate(count) {
+  if (!count) return null
+  if (count >= 100000) return 'Very large lists (100k+) typically take 2 hours or more.'
+  if (count >= 500) return 'Large lists typically process in 30 minutes or more.'
+  return null
+}
+
 export default function JobResultsPage() {
   const { jobId } = useParams()
   const [job, setJob] = useState(null)
@@ -133,7 +140,11 @@ export default function JobResultsPage() {
               <div className="flex items-center gap-3">
                 <StatusBadge status={job.status} />
                 {(job.status === 'pending' || job.status === 'processing') && (
-                  <p className="text-sm text-slate-500">Processing your list — this usually takes under a minute…</p>
+                  <p className="text-sm text-slate-500">
+                    {getTimeEstimate(job.totalNumbers || job.total_numbers)
+                      ? `Processing your list — ${getTimeEstimate(job.totalNumbers || job.total_numbers)}`
+                      : 'Processing your list — this usually takes under a minute…'}
+                  </p>
                 )}
                 {job.status === 'complete' && (
                   <p className="text-sm text-slate-500">Verification complete · results ready to download</p>
@@ -208,6 +219,9 @@ export default function JobResultsPage() {
                 </div>
                 <p className="text-sm font-medium text-navy mb-1">Verifying your numbers</p>
                 <p className="text-xs text-slate-400">This page will update automatically when complete</p>
+                {getTimeEstimate(job.totalNumbers || job.total_numbers) && (
+                  <p className="text-xs text-slate-400 mt-1">{getTimeEstimate(job.totalNumbers || job.total_numbers)}</p>
+                )}
               </div>
             )}
           </>
