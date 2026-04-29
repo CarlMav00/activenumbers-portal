@@ -17,12 +17,12 @@ export default function BillingPage() {
   useEffect(() => {
     Promise.all([
       api.get('/billing/credits'),
-      api.get('/billing/transactions').catch(() => ({ data: { data: [] } })),
-      api.get('/billing/payment-methods').catch(() => ({ data: {} })),
+      api.get('/billing/transactions').catch(() => ({ data: { transactions: [] } })),
+      api.get('/billing/subscription').catch(() => ({ data: { plan: 'free', status: 'none' } })),
     ]).then(([creditsRes, txRes, subRes]) => {
-      const credits = creditsRes.data.data?.balance ?? creditsRes.data.data?.credits ?? creditsRes.data.balance ?? creditsRes.data.credits ?? 0
-      const sub = subRes.data.data || subRes.data
-      const txs = txRes.data.data || txRes.data || []
+      const credits = creditsRes.data.balance ?? 0
+      const sub = subRes.data
+      const txs = txRes.data.transactions || txRes.data.data || []
       setBilling({ credits, subscription: sub })
       setTransactions(Array.isArray(txs) ? txs : [])
     }).catch(console.error).finally(() => setLoading(false))
@@ -63,7 +63,7 @@ export default function BillingPage() {
               <div className="card p-5">
                 <p className="text-xs text-slate-400 uppercase tracking-wide mb-2">Subscription</p>
                 <p className="text-xl font-semibold text-navy capitalize">{billing?.subscription?.plan || 'Free'}</p>
-                {billing?.subscription?.currentPeriodEnd && (
+                {billing?.subscription?.currentPeriodEnd && billing?.subscription?.plan !== 'free' && (
                   <p className="text-xs text-slate-400 mt-1">Renews {formatDate(billing.subscription.currentPeriodEnd)}</p>
                 )}
                 <Link to="/plans" className="inline-block mt-3 text-xs text-blue-brand hover:underline">

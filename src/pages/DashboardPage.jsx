@@ -41,7 +41,7 @@ export default function DashboardPage() {
       api.get('/billing/credits'),
     ]).then(([jobsRes, accountRes]) => {
       setJobs(jobsRes.data.data?.jobs || jobsRes.data.jobs || [])
-      setCredits(accountRes.data.data?.balance ?? accountRes.data.balance ?? accountRes.data.data?.credits ?? accountRes.data.credits ?? null)
+      setCredits(accountRes.data.balance ?? null)
     }).catch(console.error).finally(() => setLoading(false))
   }, [])
 
