@@ -27,6 +27,7 @@ function StatusBadge({ status }) {
     processing: 'bg-blue-50 text-blue-700 border-blue-200',
     complete: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     failed: 'bg-red-50 text-red-600 border-red-200',
+    canceled: 'bg-slate-100 text-slate-500 border-slate-200',
   }
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium capitalize ${s[status] || s.pending}`}>
@@ -49,6 +50,7 @@ export default function JobResultsPage() {
   const [numbers, setNumbers] = useState([])
   const [loading, setLoading] = useState(true)
   const [downloading, setDownloading] = useState(false)
+  const [canceling, setCanceling] = useState(false)
   const [error, setError] = useState('')
   const pollRef = useRef()
 
@@ -72,7 +74,7 @@ export default function JobResultsPage() {
       if (status === 'pending' || status === 'processing') {
         pollRef.current = setInterval(async () => {
           const s = await fetchJob()
-          if (s === 'complete' || s === 'failed' || s === 'error') {
+          if (s === 'complete' || s === 'failed' || s === 'canceled' || s === 'error') {
             clearInterval(pollRef.current)
           }
         }, 3000)
@@ -91,6 +93,20 @@ export default function JobResultsPage() {
       setError('Download failed. Please try again.')
     } finally {
       setDownloading(false)
+    }
+  }
+
+  const handleCancel = async () => {
+    if (!confirm('Cancel this job? You will be refunded for any unprocessed numbers.')) return
+    setCanceling(true)
+    try {
+      await api.post(`/jobs/${jobId}/cancel`)
+      clearInterval(pollRef.current)
+      await fetchJob()
+    } catch {
+      setError('Could not cancel job. Please try again.')
+    } finally {
+      setCanceling(false)
     }
   }
 
@@ -116,7 +132,7 @@ export default function JobResultsPage() {
             <h1 className="font-serif text-2xl font-semibold text-navy">{job?.fileName || job?.file_name || 'Job Results'}</h1>
             {job && <p className="text-sm text-slate-400 mt-0.5">{formatDate(job.createdAt || job.created_at)} · {job.totalNumbers || job.total_numbers || 0} numbers</p>}
           </div>
-          {job?.status === 'complete' && (
+          {(job?.status === 'complete' || job?.status === 'canceled') && (
             <button onClick={handleDownload} disabled={downloading} className="btn-primary flex-shrink-0">
               {downloading ? <><Spinner /> Preparing...</> : <>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
@@ -136,7 +152,7 @@ export default function JobResultsPage() {
         ) : job ? (
           <>
             {/* Status card */}
-            <div className="card p-5 flex items-center justify-between">
+            <div className="card p-5 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <StatusBadge status={job.status} />
                 {(job.status === 'pending' || job.status === 'processing') && (
@@ -149,13 +165,27 @@ export default function JobResultsPage() {
                 {job.status === 'complete' && (
                   <p className="text-sm text-slate-500">Verification complete · results ready to download</p>
                 )}
+                {job.status === 'canceled' && (
+                  <p className="text-sm text-slate-500">Job cancelled · partial results available below</p>
+                )}
                 {job.status === 'failed' && (
                   <p className="text-sm text-red-500">Job failed — please contact support</p>
                 )}
               </div>
-              {job.amountCharged != null && (
-                <p className="font-mono text-sm font-medium text-navy">${(job.amountCharged / 100).toFixed(2)} charged</p>
-              )}
+              <div className="flex items-center gap-3 flex-shrink-0">
+                {job.amountCharged != null && (
+                  <p className="font-mono text-sm font-medium text-navy">${(job.amountCharged / 100).toFixed(2)} charged</p>
+                )}
+                {(job.status === 'pending' || job.status === 'processing') && (
+                  <button
+                    onClick={handleCancel}
+                    disabled={canceling}
+                    className="text-sm text-slate-400 hover:text-red-500 underline underline-offset-2 transition-colors"
+                  >
+                    {canceling ? 'Cancelling…' : 'Cancel job'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Grade summary */}
