@@ -3,7 +3,7 @@ import api from '../lib/api'
 const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('an_user')) } catch { return null }
+    try { return JSON.parse(sessionStorage.getItem('an_user')) } catch { return null }
   })
 
   useEffect(() => {
@@ -15,8 +15,8 @@ export function AuthProvider({ children }) {
     const { data } = await api.post('/auth/login', { email, password })
     const token = data.accessToken || data.data?.accessToken
     const userData = data.user || data.data?.user
-    localStorage.setItem('an_access_token', token)
-    localStorage.setItem('an_user', JSON.stringify(userData))
+    sessionStorage.setItem('an_access_token', token)
+    sessionStorage.setItem('an_user', JSON.stringify(userData))
     setUser(userData)
     return userData
   }, [])
@@ -26,8 +26,8 @@ export function AuthProvider({ children }) {
   }, [])
   const logout = useCallback(async () => {
     try { await api.post('/auth/logout') } catch {}
-    localStorage.removeItem('an_access_token')
-    localStorage.removeItem('an_user')
+    sessionStorage.removeItem('an_access_token')
+    sessionStorage.removeItem('an_user')
     setUser(null)
   }, [])
   const forgotPassword = useCallback(async (email) => {
