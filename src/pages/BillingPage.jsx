@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import PortalLayout from '../components/layout/PortalLayout'
 import api from '../lib/api'
 
 export default function BillingPage() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [billing, setBilling] = useState(null)
   const [transactions, setTransactions] = useState([])
@@ -81,17 +82,23 @@ export default function BillingPage() {
                 <div className="px-6 py-10 text-center text-sm text-slate-400">No transactions yet</div>
               ) : (
                 <div className="divide-y divide-gray-100">
-                  {transactions.map((tx, i) => (
-                    <div key={i} className="flex items-center justify-between px-6 py-4">
-                      <div>
-                        <p className="text-sm font-medium text-navy capitalize">{tx.type?.replace(/_/g, ' ') || 'Transaction'}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{formatDate(tx.createdAt || tx.created_at)}</p>
+                  {transactions.map((tx, i) => {
+                    const isCredit = tx.type === 'credit' || tx.type === 'subscription'
+                    return (
+                      <div key={i} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 cursor-pointer transition-colors" onClick={() => navigate(`/billing/receipts/${tx.id}`)}>
+                        <div>
+                          <p className="text-sm font-medium text-navy capitalize">{tx.description || tx.type?.replace(/_/g, ' ') || 'Transaction'}</p>
+                          <p className="text-xs text-slate-400 mt-0.5">{formatDate(tx.createdAt || tx.created_at)}</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <p className={`font-mono text-sm font-medium ${isCredit ? 'text-emerald-600' : 'text-navy'}`}>
+                            {isCredit ? '+' : '-'}{formatCents(tx.amount)}
+                          </p>
+                          <span className="text-xs text-slate-400 hover:text-navy">Receipt →</span>
+                        </div>
                       </div>
-                      <p className={`font-mono text-sm font-medium ${tx.amount > 0 ? 'text-emerald-600' : 'text-navy'}`}>
-                        {tx.amount > 0 ? '+' : ''}{formatCents(tx.amount)}
-                      </p>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>

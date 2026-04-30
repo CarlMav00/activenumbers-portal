@@ -12,6 +12,7 @@ import JobResultsPage from './pages/JobResultsPage'
 import PlansPage from './pages/PlansPage'
 import AddCardPage from './pages/AddCardPage'
 import BillingPage from './pages/BillingPage'
+import ReceiptPage from './pages/ReceiptPage'
 import AccountPage from './pages/AccountPage'
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/plans" element={<ProtectedRoute><PlansPage /></ProtectedRoute>} />
           <Route path="/billing" element={<ProtectedRoute><BillingPage /></ProtectedRoute>} />
           <Route path="/billing/card" element={<ProtectedRoute><AddCardPage /></ProtectedRoute>} />
+          <Route path="/billing/receipts/:id" element={<ProtectedRoute><ReceiptPage /></ProtectedRoute>} />
           <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
