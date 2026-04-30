@@ -129,7 +129,7 @@ export default function JobResultsPage() {
               <span className="text-slate-300">/</span>
               <span className="text-sm text-navy font-medium">Job Results</span>
             </div>
-            <h1 className="font-serif text-2xl font-semibold text-navy">{job?.fileName || job?.file_name || 'Job Results'}</h1>
+            <h1 className="font-serif text-2xl font-semibold text-navy">{job?.name || job?.originalFilename || 'Job Results'}</h1>
             {job && <p className="text-sm text-slate-400 mt-0.5">{formatDate(job.createdAt || job.created_at)} · {job.totalNumbers || job.total_numbers || 0} numbers</p>}
           </div>
           {(job?.status === 'complete' || job?.status === 'canceled') && (

@@ -101,7 +101,7 @@ export default function DashboardPage() {
               {jobs.map(job => (
                 <Link key={job.id} to={`/jobs/${job.id}`} className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 transition-colors">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-navy truncate">{job.fileName || job.file_name || 'Untitled job'}</p>
+                    <p className="text-sm font-medium text-navy truncate">{job.name || job.original_filename || 'Untitled job'}</p>
                     <p className="text-xs text-slate-400 mt-0.5">{formatDate(job.createdAt || job.created_at)} · {job.totalNumbers || job.total_numbers || 0} numbers</p>
                   </div>
                   <StatusBadge status={job.status} />

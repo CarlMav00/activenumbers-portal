@@ -15,6 +15,7 @@ export default function UploadPage() {
   const navigate = useNavigate()
   const inputRef = useRef()
   const [file, setFile] = useState(null)
+  const [jobName, setJobName] = useState('')
   const [rowCount, setRowCount] = useState(null)
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -39,6 +40,7 @@ export default function UploadPage() {
     if (!f.name.match(/\.(csv|txt)$/i)) { setError('Please upload a CSV or TXT file.'); return }
     setError('')
     setFile(f)
+    setJobName(f.name.replace(/\.[^.]+$/, ''))
     const reader = new FileReader()
     reader.onload = (e) => {
       const lines = e.target.result.split('\n').filter(l => l.trim())
@@ -62,6 +64,7 @@ export default function UploadPage() {
     try {
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('name', jobName.trim() || file.name.replace(/\.[^.]+$/, ''))
       if (confirmOverage) formData.append('confirmOverage', 'true')
       const { data } = await api.post('/jobs/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -123,6 +126,21 @@ export default function UploadPage() {
                 <p className="text-xs text-slate-500">{rowCount != null ? `${rowCount.toLocaleString()} numbers detected` : 'Reading file...'}</p>
               </div>
               <button onClick={() => { setFile(null); setRowCount(null) }} className="text-xs text-slate-400 hover:text-navy underline flex-shrink-0">Change</button>
+            </div>
+          )}
+
+          {/* Job name */}
+          {file && (
+            <div>
+              <label className="label">Job name</label>
+              <input
+                type="text"
+                className="input-field"
+                maxLength={100}
+                value={jobName}
+                onChange={e => setJobName(e.target.value)}
+                placeholder="e.g. April campaign list"
+              />
             </div>
           )}
 
