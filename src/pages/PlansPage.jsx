@@ -162,6 +162,7 @@ export default function PlansPage() {
   const [error, setError] = useState('')
   const [currentPlan, setCurrentPlan] = useState(user?.plan || 'free')
   const [contactOpen, setContactOpen] = useState(false)
+  const [cancelSuccess, setCancelSuccess] = useState(false)
 
   useEffect(() => {
     api.get('/billing/subscription').then(res => {
@@ -199,11 +200,13 @@ export default function PlansPage() {
   const handleCancel = async () => {
     if (!confirm('Cancel your subscription? You will keep access until the end of the billing period.')) return
     setLoading('cancel')
+    setError('')
     try {
       await api.post('/billing/cancel')
       setCurrentPlan('free')
+      setCancelSuccess(true)
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not cancel subscription.')
+      setError(err.response?.data?.message || 'Could not cancel subscription. Please contact support at hello@activenumbers.io.')
     } finally {
       setLoading(null)
     }
@@ -222,6 +225,12 @@ export default function PlansPage() {
         </div>
 
         {error && <div className="mb-6 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-600">{error}</div>}
+        {cancelSuccess && (
+          <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 text-sm text-emerald-700 flex items-center gap-2">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+            Your subscription has been cancelled. Your credits remain available to use.
+          </div>
+        )}
 
         {/* One-off option */}
         <div className="card p-5 mb-6 flex items-center justify-between gap-4">
