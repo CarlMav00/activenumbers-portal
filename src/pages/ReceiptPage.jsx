@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import PortalLayout from '../components/layout/PortalLayout'
+import logoSrc from '../assets/logo.js'
 import api from '../lib/api'
 
 function invoiceNumber(id) {
@@ -56,8 +57,8 @@ export default function ReceiptPage() {
             {/* Header */}
             <div className="flex items-start justify-between mb-8">
               <div>
-                <p className="font-serif text-2xl font-semibold text-navy">Active Numbers</p>
-                <p className="text-xs text-slate-400 mt-1">activenumbers.io</p>
+                <img src={logoSrc} alt="Active Numbers" className="h-10 w-auto mb-2" />
+                <p className="text-xs text-slate-400">activenumbers.io</p>
                 <p className="text-xs text-slate-400">hello@activenumbers.io</p>
               </div>
               <div className="text-right">
