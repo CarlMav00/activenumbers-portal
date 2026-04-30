@@ -1,9 +1,9 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import PortalLayout from '../components/layout/PortalLayout'
 import api from '../lib/api'
 
-const PRICE_PER_NUMBER = 0.05
+const PLAN_RATES = { starter: 0.045, growth: 0.040, scale: 0.035, free: 0.05 }
 
 function getTimeNotice(count) {
   if (count >= 100000) return 'Very large lists (100k+) typically take 2 hours or more. We\'ll email your results when ready.'
@@ -21,6 +21,18 @@ export default function UploadPage() {
   const [error, setError] = useState('')
   const [insufficientFunds, setInsufficientFunds] = useState(false)
   const [overageInfo, setOverageInfo] = useState(null)
+  const [balance, setBalance] = useState(null)
+  const [plan, setPlan] = useState('free')
+
+  useEffect(() => {
+    Promise.all([
+      api.get('/billing/credits').catch(() => null),
+      api.get('/billing/subscription').catch(() => null),
+    ]).then(([creditsRes, subRes]) => {
+      if (creditsRes?.data?.balance != null) setBalance(creditsRes.data.balance)
+      if (subRes?.data?.plan) setPlan(subRes.data.plan)
+    })
+  }, [])
 
   const handleFile = (f) => {
     if (!f) return
@@ -72,7 +84,8 @@ export default function UploadPage() {
     }
   }
 
-  const cost = rowCount != null ? (rowCount * PRICE_PER_NUMBER).toFixed(2) : null
+  const pricePerNumber = PLAN_RATES[plan] ?? 0.05
+  const cost = rowCount != null ? (rowCount * pricePerNumber).toFixed(2) : null
 
   return (
     <PortalLayout>
@@ -117,8 +130,12 @@ export default function UploadPage() {
           {cost != null && (
             <div className="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3 flex justify-between items-center">
               <div>
-                <p className="text-sm text-slate-500">{rowCount?.toLocaleString()} numbers × $0.05</p>
-                <p className="text-xs text-slate-400 mt-0.5">Charged from your credit balance</p>
+                <p className="text-sm text-slate-500">{rowCount?.toLocaleString()} numbers × ${pricePerNumber.toFixed(3)}</p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {balance != null
+                    ? `Charged from your credit balance of $${(balance / 100).toFixed(2)} CAD`
+                    : 'Charged from your credit balance'}
+                </p>
               </div>
               <p className="font-mono text-lg font-semibold text-navy">${cost}</p>
             </div>
