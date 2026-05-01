@@ -79,8 +79,10 @@ export default function UploadPage() {
         } else {
           setInsufficientFunds(true)
         }
+      } else if (err.response?.data?.error?.code === 'NO_VALID_NUMBERS' || err.response?.data?.error?.code === 'EMPTY_FILE') {
+        setError('Your file doesn\'t appear to contain valid phone numbers. Please upload a CSV with one Canadian phone number per row.')
       } else {
-        setError(err.response?.data?.error?.message || err.response?.data?.message || 'Upload failed. Please try again.')
+        setError(err.response?.data?.error?.message || err.response?.data?.message || 'An error occurred. Please try again.')
       }
     } finally {
       setUploading(false)
