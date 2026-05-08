@@ -28,13 +28,13 @@ export default function RegisterPage() {
           <svg className="w-7 h-7 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
         </div>
         <p className="text-navy font-medium mb-2">Verification email sent</p>
-        <p className="text-sm text-slate-500 mb-6">Click the link sent to <strong>{form.email}</strong> to activate your account and get your $0.50 free credit.</p>
+        <p className="text-sm text-slate-500 mb-6">Click the link sent to <strong>{form.email}</strong> to activate your account and get your $0.30 free credit.</p>
         <Link to="/login" className="btn-secondary">Back to sign in</Link>
       </div>
     </AuthLayout>
   )
   return (
-    <AuthLayout title="Create your account" subtitle="Start with $0.50 free credit — no card required">
+    <AuthLayout title="Create your account" subtitle="Start with $0.30 free credit — no card required">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="label">Email address</label>

@@ -18,7 +18,7 @@ export default function VerifyEmailPage() {
           <svg className="w-7 h-7 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
         </div>
         <p className="text-navy font-medium mb-2">Your account is active</p>
-        <p className="text-sm text-slate-500 mb-6">Your $0.50 free credit has been applied.</p>
+        <p className="text-sm text-slate-500 mb-6">Your $0.30 free credit has been applied.</p>
         <Link to="/login" className="btn-primary">Sign in</Link>
       </div>
     </AuthLayout>

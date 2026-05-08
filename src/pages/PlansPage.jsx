@@ -219,7 +219,7 @@ export default function PlansPage() {
           <h1 className="font-serif text-2xl font-semibold text-navy">Plans</h1>
           <p className="text-sm text-slate-500 mt-1">
             {currentPlan === 'free'
-              ? 'You are on the Free plan — $0.50 credit included, $0.06 per number.'
+              ? 'You are on the Free plan — $0.30 credit included, $0.06 per number.'
               : `You are on the ${currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)} plan.`}
           </p>
         </div>
