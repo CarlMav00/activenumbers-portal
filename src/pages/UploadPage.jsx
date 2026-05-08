@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import PortalLayout from '../components/layout/PortalLayout'
 import api from '../lib/api'
 
-const PLAN_RATES = { starter: 0.045, growth: 0.040, scale: 0.035, free: 0.05 }
+const PLAN_RATES = { starter: 0.055, growth: 0.050, scale: 0.045, free: 0.06 }
 
 function getTimeNotice(count) {
   if (count >= 100000) return 'Very large lists (100k+) typically take 2 hours or more. We\'ll email your results when ready.'
@@ -89,7 +89,7 @@ export default function UploadPage() {
     }
   }
 
-  const pricePerNumber = PLAN_RATES[plan] ?? 0.05
+  const pricePerNumber = PLAN_RATES[plan] ?? 0.06
   const cost = rowCount != null ? (rowCount * pricePerNumber).toFixed(2) : null
 
   return (

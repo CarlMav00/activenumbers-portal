@@ -9,9 +9,9 @@ const PLANS = [
     id: 'starter',
     name: 'Starter',
     price: 99,
-    rate: '$0.045',
+    rate: '$0.055',
     volume: 'Up to 2,500 / mo',
-    overage: '$0.05 / number overage',
+    overage: '$0.06 / number overage',
     features: ['Batch upload', 'API access', 'Webhook delivery', 'CSV download'],
     priceEnvKey: 'VITE_STRIPE_STARTER_PRICE_ID',
   },
@@ -19,9 +19,9 @@ const PLANS = [
     id: 'growth',
     name: 'Growth',
     price: 249,
-    rate: '$0.04',
+    rate: '$0.05',
     volume: 'Up to 6,500 / mo',
-    overage: '$0.045 / number overage',
+    overage: '$0.055 / number overage',
     features: ['Batch upload', 'API access', 'Webhook delivery', 'Priority queue'],
     popular: true,
     priceEnvKey: 'VITE_STRIPE_GROWTH_PRICE_ID',
@@ -30,9 +30,9 @@ const PLANS = [
     id: 'scale',
     name: 'Scale',
     price: 599,
-    rate: '$0.035',
+    rate: '$0.045',
     volume: 'Up to 17,000 / mo',
-    overage: '$0.04 / number overage',
+    overage: '$0.05 / number overage',
     features: ['Batch upload', 'API access', 'Webhook delivery', 'Priority queue'],
     priceEnvKey: 'VITE_STRIPE_SCALE_PRICE_ID',
   },
@@ -219,7 +219,7 @@ export default function PlansPage() {
           <h1 className="font-serif text-2xl font-semibold text-navy">Plans</h1>
           <p className="text-sm text-slate-500 mt-1">
             {currentPlan === 'free'
-              ? 'You are on the Free plan — $0.50 credit included, $0.05 per number.'
+              ? 'You are on the Free plan — $0.50 credit included, $0.06 per number.'
               : `You are on the ${currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)} plan.`}
           </p>
         </div>
@@ -236,7 +236,7 @@ export default function PlansPage() {
         <div className="card p-5 mb-6 flex items-center justify-between gap-4">
           <div>
             <p className="font-medium text-navy">Pay as you go</p>
-            <p className="text-sm text-slate-500 mt-0.5">$0.05 per number · no commitment · top up your balance any time</p>
+            <p className="text-sm text-slate-500 mt-0.5">$0.06 per number · no commitment · top up your balance any time</p>
           </div>
           <button onClick={() => navigate('/billing/card?topup=true')} className="btn-secondary flex-shrink-0 text-sm">
             Add credits
