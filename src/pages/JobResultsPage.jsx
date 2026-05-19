@@ -159,7 +159,7 @@ export default function JobResultsPage() {
                   <p className="text-sm text-slate-500">
                     {getTimeEstimate(job.totalNumbers || job.total_numbers)
                       ? `Processing your list — ${getTimeEstimate(job.totalNumbers || job.total_numbers)}`
-                      : 'Processing your list — this usually takes under a minute…'}
+                      : 'Processing your list — this could take several minutes'}
                   </p>
                 )}
                 {job.status === 'complete' && (
@@ -248,7 +248,7 @@ export default function JobResultsPage() {
                   <svg className="animate-spin w-6 h-6 text-blue-brand" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                 </div>
                 <p className="text-sm font-medium text-navy mb-1">Verifying your numbers</p>
-                <p className="text-xs text-slate-400">This page will update automatically when complete</p>
+                <p className="text-xs text-slate-400">This could take several minutes — this page will update automatically when complete</p>
                 {getTimeEstimate(job.totalNumbers || job.total_numbers) && (
                   <p className="text-xs text-slate-400 mt-1">{getTimeEstimate(job.totalNumbers || job.total_numbers)}</p>
                 )}
