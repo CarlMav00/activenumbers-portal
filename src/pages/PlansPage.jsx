@@ -163,6 +163,8 @@ export default function PlansPage() {
   const [currentPlan, setCurrentPlan] = useState(user?.plan || 'free')
   const [contactOpen, setContactOpen] = useState(false)
   const [cancelSuccess, setCancelSuccess] = useState(false)
+  const [promoCode, setPromoCode] = useState('')
+  const [promoOpen, setPromoOpen] = useState(false)
 
   useEffect(() => {
     api.get('/billing/subscription').then(res => {
@@ -179,12 +181,12 @@ export default function PlansPage() {
       const cardRes = await api.get('/billing/payment-methods')
       const hasCard = (cardRes.data.paymentMethods?.length ?? 0) > 0
       if (!hasCard) {
-        // Send to add card page with plan intent
-        navigate(`/billing/card?plan=${plan.id}`)
+        const promoParam = promoCode.trim() ? `&promo=${encodeURIComponent(promoCode.trim())}` : ''
+        navigate(`/billing/card?plan=${plan.id}${promoParam}`)
         return
       }
       // Subscribe directly
-      const { data } = await api.post('/billing/subscribe', { plan: plan.id })
+      const { data } = await api.post('/billing/subscribe', { plan: plan.id, ...(promoCode.trim() && { promoCode: promoCode.trim() }) })
       if (data.data?.clientSecret || data.clientSecret) {
         navigate('/billing?subscribed=true')
       } else {
@@ -293,6 +295,39 @@ export default function PlansPage() {
             )
           })}
         </div>
+
+        {/* Promo code */}
+        {currentPlan === 'free' && (
+          <div className="mb-6">
+            {promoOpen ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  className="input-field flex-1 text-sm"
+                  placeholder="Enter promo code"
+                  value={promoCode}
+                  onChange={e => setPromoCode(e.target.value.toUpperCase())}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => { setPromoOpen(false); setPromoCode('') }}
+                  className="text-sm text-slate-400 hover:text-slate-600 px-2"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setPromoOpen(true)}
+                className="text-sm text-blue-brand hover:underline"
+              >
+                Have a promo code?
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Enterprise */}
         <div className="card p-5 flex items-center justify-between gap-4">

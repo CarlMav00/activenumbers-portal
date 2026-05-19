@@ -20,7 +20,7 @@ const CARD_ELEMENT_OPTIONS = {
   hidePostalCode: false,
 }
 
-function CardForm({ plan, topup }) {
+function CardForm({ plan, promo, topup }) {
   const stripe = useStripe()
   const elements = useElements()
   const navigate = useNavigate()
@@ -59,7 +59,7 @@ function CardForm({ plan, topup }) {
         navigate('/billing?topup=true')
       } else if (plan) {
         // Subscribe to plan
-        await api.post('/billing/subscribe', { plan })
+        await api.post('/billing/subscribe', { plan, ...(promo && { promoCode: promo }) })
         navigate('/billing?subscribed=true')
       } else {
         navigate('/billing?card=saved')
@@ -114,6 +114,7 @@ function CardForm({ plan, topup }) {
 export default function AddCardPage() {
   const [searchParams] = useSearchParams()
   const plan = searchParams.get('plan')
+  const promo = searchParams.get('promo') || ''
   const topup = searchParams.get('topup') === 'true'
 
   const title = topup ? 'Add Credits' : plan ? `Subscribe to ${plan.charAt(0).toUpperCase() + plan.slice(1)}` : 'Add Payment Method'
@@ -130,7 +131,7 @@ export default function AddCardPage() {
 
         <div className="card p-6">
           <Elements stripe={stripePromise}>
-            <CardForm plan={plan} topup={topup} />
+            <CardForm plan={plan} promo={promo} topup={topup} />
           </Elements>
         </div>
       </div>
