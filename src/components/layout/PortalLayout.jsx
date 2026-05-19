@@ -24,9 +24,9 @@ function Sidebar({ user, pathname, onLogout }) {
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 py-5 border-b border-gray-100">
-        <Link to="/dashboard" className="flex items-center gap-2.5">
+        <a href="https://activenumbers.io" className="flex items-center gap-2.5">
           <img src={logoSrc} alt="Active Numbers" className="h-12 w-auto" />
-        </Link>
+        </a>
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
         {NAV.map(n => <NavItem key={n.to} {...n} active={pathname === n.to || (n.to !== '/dashboard' && pathname.startsWith(n.to))} />)}
