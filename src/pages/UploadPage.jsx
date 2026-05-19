@@ -44,7 +44,7 @@ export default function UploadPage() {
     const reader = new FileReader()
     reader.onload = (e) => {
       const lines = e.target.result.split('\n').filter(l => l.trim())
-      setRowCount(lines.length)
+      setRowCount(Math.max(0, lines.length - 1)) // subtract header row
     }
     reader.readAsText(f)
   }
@@ -97,7 +97,10 @@ export default function UploadPage() {
       <div className="max-w-xl mx-auto">
         <div className="mb-6">
           <h1 className="font-serif text-2xl font-semibold text-navy">Upload a List</h1>
-          <p className="text-sm text-slate-500 mt-1">Upload a CSV or TXT file with one phone number per row.</p>
+          <p className="text-sm text-slate-500 mt-1">
+            Upload a CSV or TXT file — phone number must be in the first column, first row is treated as a header.{' '}
+            <a href="/template.csv" download className="text-blue-brand hover:underline">Download template</a>
+          </p>
         </div>
 
         <div className="card p-6 space-y-5">
@@ -114,7 +117,7 @@ export default function UploadPage() {
               <svg className="w-5 h-5 text-blue-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
             </div>
             <p className="text-sm text-slate-500"><span className="text-blue-brand font-medium">Click to upload</span> or drag and drop</p>
-            <p className="text-xs text-slate-400 mt-1">CSV or TXT · one number per row · max 50MB</p>
+            <p className="text-xs text-slate-400 mt-1">CSV or TXT · phone number in first column · max 50MB</p>
           </div>
 
           {/* File confirmed */}
