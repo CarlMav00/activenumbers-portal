@@ -98,7 +98,7 @@ export default function UploadPage() {
         <div className="mb-6">
           <h1 className="font-serif text-2xl font-semibold text-navy">Upload a List</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Upload a CSV or TXT file — phone number must be in the first column, first row is treated as a header.{' '}
+            Phone number must be in the first column. Any additional columns you include will be retained and appended after the verification results.{' '}
             <a href="/template.csv" download className="text-blue-brand hover:underline">Download template</a>
           </p>
         </div>
